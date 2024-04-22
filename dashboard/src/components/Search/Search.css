@@ -12,6 +12,9 @@ input[type="text"] {
   margin-top: 20px;
   margin-bottom: 20px;
   float: right;
+  /* width: 80%; */
+  align-items: center;
+  justify-content: right;
 }
 
 select {
@@ -22,19 +25,19 @@ select {
   padding: 5px;
 }
 
-.search_icon button{
+.search_icon button {
   height: 40px;
-    width: 80px;
-    border-radius: 8px;
-    border: none;
-    background: #141b2d;
-    color: white;
-    font-size: 15px;
-    cursor: pointer;
+  width: 80px;
+  border-radius: 8px;
+  border: none;
+  background: #141b2d;
+  color: white;
+  font-size: 15px;
+  cursor: pointer;
 }
 
-.search_icon button:active{
+.search_icon button:active {
   transform: translateY(5px);
   cursor: pointer;
-  transition: ease-in-out .1s;
+  transition: ease-in-out 0.1s;
 }

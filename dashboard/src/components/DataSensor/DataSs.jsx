@@ -2,7 +2,10 @@ import React, { useState, useEffect } from "react";
 import Header from "../Header/Header";
 import "./DataSs.css";
 import { FaSort } from "react-icons/fa";
-import Search from "../Search/Search";
+import { DatePicker, Space } from "antd";
+import DateFilter from "../DateFilter/DateFilter";
+import dayjs from "dayjs";
+import axios from "axios";
 
 const DataSs = () => {
   const [sensorData, setSensorData] = useState([]);
@@ -10,6 +13,10 @@ const DataSs = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedOption, setSelectedOption] = useState("temperature");
+
+  const { RangePicker } = DatePicker;
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const dataSearch = [
     {
@@ -27,12 +34,27 @@ const DataSs = () => {
   ];
 
   useEffect(() => {
-    fetch(`http://localhost:5000/get-data-sensor?page=${currentPage}`)
-      .then((response) => response.json())
-      .then((data) => setSensorData(data.data))
-      .catch((error) => console.error("Error fetching data:", error));
-    console.log(sensorData);
-  }, [currentPage]);
+    const fetchData = async () => {
+      try {
+        if (startDate !== "" && endDate !== "") {
+          const response = await axios.get(
+            `http://localhost:5000/get-data-sensor/filter?startDate=${startDate}&endDate=${endDate}&page=${currentPage}`
+          );
+          setSensorData(response.data);
+        } else {
+          const response = await fetch(
+            `http://localhost:5000/get-data-sensor?page=${currentPage}`
+          );
+          const data = await response.json();
+          setSensorData(data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, [startDate, endDate, currentPage]);
 
   const handleNextPage = () => {
     setCurrentPage(currentPage + 1);
@@ -57,7 +79,7 @@ const DataSs = () => {
   const handleSearch = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/get-data-sensor/search?term=${searchTerm}&option=${selectedOption}&page=${currentPage}`
+        `http://localhost:5000/get-data-sensor/search?term=${searchTerm}&option=${selectedOption}`
       );
       const searchData = await response.json();
       setSensorData(searchData);
@@ -77,13 +99,19 @@ const DataSs = () => {
     console.log(e.target.value);
   };
 
-  // useEffect(() => {
-  //   handleSearch();
-  // }, [selectedOption, searchTerm, currentPage]);
-
   return (
     <div className="container" style={{ height: "calc(100vh - 75px)" }}>
       <div className="search">
+        <div style={{ marginRight: "10px" }}>
+          <Space direction="vertical" size={12}>
+            <RangePicker
+              onChange={(e) => {
+                setStartDate(dayjs(e[0].$d).format("YYYY-MM-DD"));
+                setEndDate(dayjs(e[1].$d).format("YYYY-MM-DD"));
+              }}
+            />
+          </Space>
+        </div>
         <input
           type="text"
           placeholder="Search..."

@@ -3,6 +3,7 @@ const mysql = require("mysql");
 const router = express.Router();
 const { v4: uuidv4 } = require("uuid");
 const { exec } = require("child_process");
+const moment = require("moment");
 
 // MQTT
 const mqtt = require("mqtt");
@@ -179,6 +180,38 @@ router.post("/toggle-device", (req, res) => {
       });
     }
   );
+});
+
+router.get("/filter", (req, res) => {
+  let { startDate, endDate, page, limit } = req.query;
+
+  if (!startDate || !endDate) {
+    return res
+      .status(400)
+      .json({ error: "Missing startDate or endDate parameter" });
+  }
+
+  endDate = moment(endDate).endOf("day").format("YYYY-MM-DD HH:mm:ss");
+  endDate = moment(endDate).subtract(1, "second").format("YYYY-MM-DD HH:mm:ss");
+
+  page = parseInt(page) || 1;
+  limit = parseInt(limit) || 10;
+  const offset = (page - 1) * limit;
+
+  const sql = `
+    SELECT * FROM actionhistory 
+    WHERE date BETWEEN ? AND ? 
+    LIMIT ? OFFSET ?
+  `;
+  const values = [startDate, endDate, limit, offset];
+
+  db.query(sql, values, (error, results) => {
+    if (error) {
+      handleQueryError(res, error, "Error executing query");
+    } else {
+      res.json(results);
+    }
+  });
 });
 
 module.exports = router;
