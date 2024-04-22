@@ -1,0 +1,21 @@
+.table {
+  width: 100%;
+  color: white;
+  background-color: #1f2a40;
+  padding: 20px 10px;
+  text-align: center;
+  border-radius: 5px;
+}
+
+thead {
+  font-size: 18px;
+}
+
+.table tbody td {
+  border-bottom: 1px dashed #ccc;
+  padding: 10px;
+}
+
+.navbar-menu {
+  display: flex;
+}

@@ -1,0 +1,40 @@
+input[type="text"] {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid;
+  width: 200px;
+  font-size: 16px;
+}
+
+.search {
+  position: relative;
+  display: flex;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  float: right;
+}
+
+select {
+  height: 40px;
+  margin: 0 10px;
+  border-radius: 8px;
+  font-size: 16px;
+  padding: 5px;
+}
+
+.search_icon button{
+  height: 40px;
+    width: 80px;
+    border-radius: 8px;
+    border: none;
+    background: #141b2d;
+    color: white;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.search_icon button:active{
+  transform: translateY(5px);
+  cursor: pointer;
+  transition: ease-in-out .1s;
+}

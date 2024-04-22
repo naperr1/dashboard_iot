@@ -1,0 +1,33 @@
+.container {
+}
+h2 {
+  margin: 0;
+}
+
+.profile {
+  background-color: #1f2a40;
+  width: 50%;
+  height: 200px;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+table {
+  margin-top: 30px;
+  width: 400px;
+}
+
+img {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+td {
+  padding: 5px 0;
+}

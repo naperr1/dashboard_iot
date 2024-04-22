@@ -1,0 +1,170 @@
+h1 {
+  margin: 0;
+  color: #e0e0e0;
+  margin-bottom: 10px;
+}
+
+.container {
+  margin: 0 70px !important;
+  width: 90%;
+  /* margin-top: 20px !important; */
+  height: 100vh - 75px;
+}
+
+.header {
+  padding: 20px 0;
+}
+
+.header span {
+  color: #70d8bd;
+  font-style: 16px;
+}
+
+.container_box {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.container_box .box {
+  width: 30%;
+  height: 140px;
+  background-color: #1f2a40;
+  border-radius: 5px;
+  /* display: flex;
+  align-items: center;
+  justify-content: space-around;
+  flex-direction: column; */
+}
+
+.light-box,
+.humidity-box,
+.temperature-box {
+  position: relative;
+}
+
+.icon-light,
+#humidityBox .img-humidity,
+#temperatureBox img {
+  position: absolute;
+  right: 35px;
+  top: 20px;
+  width: 65px;
+  height: 65px;
+  object-fit: cover;
+}
+
+.light-box2,
+.humidity-box2,
+.temperature-box2 {
+  display: flex;
+  align-items: center;
+  position: absolute;
+  bottom: 25px;
+  left: 25px;
+}
+
+.humidity-box2 img {
+  width: 40px;
+  height: 40px;
+}
+
+.light-box2 span {
+  color: #4caf50 !important;
+}
+
+.icon {
+  font-size: 40px;
+  color: #3da58a;
+}
+
+.box span {
+  color: #fff;
+  font-size: 30px;
+}
+
+/* .toggle-switch {
+  width: 60px;
+  height: 30px;
+  background-color: #ccc;
+  border-radius: 15px;
+  position: relative;
+  cursor: pointer;
+}
+
+.slider {
+  width: 30px;
+  height: 30px;
+  background-color: red;
+  border-radius: 50%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.toggle-switch.active .slider {
+  transform: translateX(30px);
+  background-color: #4caf50;
+}
+
+.fan-icon {
+  font-size: 24px;
+  margin-right: 10px;
+}
+
+@keyframes rotateAnimation {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.fan-icon.rotate {
+  animation: rotateAnimation 0.8s linear infinite;
+}
+
+.light-on {
+  color: yellow;
+}
+
+.container_body {
+  display: flex;
+  margin-top: 30px;
+}
+
+.chart {
+  width: 70%;
+}
+
+.turn {
+  width: 30%;
+}
+
+.turn_light,
+.turn_fan {
+  background-color: #1f2a40;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  background-color: #fff;
+  border: 1px solid #000;
+  border-radius: 5px;
+}
+
+.turn_fan img {
+  width: 75px;
+  height: 75px;
+  margin-bottom: 20px;
+}
+
+.turn_light {
+  margin-top: 20px;
+  height: 125px;
+} */
