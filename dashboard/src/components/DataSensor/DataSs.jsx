@@ -20,6 +20,10 @@ const DataSs = () => {
 
   const dataSearch = [
     {
+      name: "all",
+      value: "All",
+    },
+    {
       name: "temperature",
       value: "Temperature",
     },
@@ -30,6 +34,14 @@ const DataSs = () => {
     {
       name: "light",
       value: "Light",
+    },
+    {
+      name: "date",
+      value: "Date",
+    },
+    {
+      name: "wind",
+      value: "Wind",
     },
   ];
 
@@ -78,6 +90,9 @@ const DataSs = () => {
 
   const handleSearch = async () => {
     try {
+      if (!searchTerm.trim()) {
+        return; // Không làm gì nếu trường tìm kiếm là rỗng
+      }
       const response = await fetch(
         `http://localhost:5000/get-data-sensor/search?term=${searchTerm}&option=${selectedOption}`
       );
@@ -147,6 +162,9 @@ const DataSs = () => {
             <th onClick={() => handleSort("light")}>
               Light <FaSort />
             </th>
+            <th onClick={() => handleSort("wind_speed")}>
+              Wind_speed <FaSort />
+            </th>
             <th onClick={() => handleSort("createAt")}>
               CreatedAt <FaSort />
             </th>
@@ -159,6 +177,7 @@ const DataSs = () => {
               <td>{item.temperature}</td>
               <td>{item.humidity}</td>
               <td>{item.light}</td>
+              <td>{item.wind_speed}</td>
               <td>{new Date(item.createAt).toLocaleString()}</td>{" "}
             </tr>
           ))}

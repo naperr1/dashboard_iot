@@ -1,140 +1,3 @@
-// const express = require("express");
-// const mysql = require("mysql");
-// const router = express.Router();
-// const moment = require("moment");
-
-// const db = mysql.createConnection({
-//   host: "localhost",
-//   user: "root",
-//   password: "123456",
-//   database: "iot",
-// });
-
-// // Get all data sensor and paging page
-// router.get("/", (req, res) => {
-//   const page = parseInt(req.query.page) || 1;
-//   const limit = parseInt(req.query.limit) || 10;
-//   const offset = (page - 1) * limit;
-
-//   const query = "SELECT * FROM datass LIMIT ? OFFSET ?";
-
-//   db.query(query, [limit, offset], (err, results) => {
-//     if (err) {
-//       console.error("Error retrieving data:", err);
-//       res.status(500).json({ error: "Error retrieving data" });
-//     } else {
-//       res.status(200).json({
-//         message: "Successfully",
-//         data: results,
-//       });
-//     }
-//   });
-// });
-
-// router.get("/sort", (req, res) => {
-//   const sortBy = req.query.sortBy; // Cột mà người dùng muốn sắp xếp
-//   const sortOrder = req.query.sortOrder === "desc" ? "DESC" : "ASC"; // Hướng sắp xếp, mặc định là ASC
-
-//   // Kiểm tra xem người dùng đã cung cấp cột sắp xếp hay không
-//   if (!sortBy) {
-//     return res
-//       .status(400)
-//       .json({ error: "Please provide a column to sort by" });
-//   }
-
-//   // Kiểm tra xem cột sắp xếp có hợp lệ hay không (để tránh SQL injection)
-//   const validColumns = ["id", "temperature", "humidity", "light", "createAt"];
-//   if (!validColumns.includes(sortBy)) {
-//     return res.status(400).json({ error: "Invalid column to sort by" });
-//   }
-
-//   const page = parseInt(req.query.page) || 1;
-//   const limit = parseInt(req.query.limit) || 10;
-//   const offset = (page - 1) * limit;
-
-//   const baseQuery = `SELECT * FROM datass`;
-
-//   const query = `
-//     SELECT * FROM (
-//       ${baseQuery} ORDER BY ${sortBy} ${sortOrder} LIMIT ${offset}, ${limit}
-//     ) AS sorted_data
-//     ORDER BY ${sortBy} ${sortOrder}
-//   `;
-
-//   db.query(query, (err, results) => {
-//     if (err) {
-//       console.error("Error sorting data:", err);
-//       res.status(500).json({ error: "Error sorting data" });
-//     } else {
-//       res.status(200).json(results);
-//     }
-//   });
-// });
-
-// router.get("/filter", (req, res) => {
-//   let { startDate, endDate, page, limit } = req.query;
-
-//   endDate = moment(endDate).endOf("day").format("YYYY-MM-DD HH:mm:ss");
-//   endDate = moment(endDate).subtract(1, "second").format("YYYY-MM-DD HH:mm:ss");
-
-//   if (!startDate || !endDate) {
-//     return res
-//       .status(400)
-//       .json({ error: "Thiếu tham số startDate hoặc endDate" });
-//   }
-
-//   page = parseInt(page) || 1;
-//   limit = parseInt(limit) || 10;
-//   const offset = (page - 1) * limit;
-
-//   const sql =
-//     "SELECT * FROM datass WHERE createAt BETWEEN ? AND ? LIMIT ? OFFSET ?";
-//   const values = [startDate, endDate, limit, offset];
-
-//   db.query(sql, values, (error, results) => {
-//     if (error) {
-//       console.error("Error executing query:", error);
-//       return res.status(500).json({ error: "Lỗi khi truy vấn dữ liệu" });
-//     }
-//     res.json(results);
-//   });
-// });
-
-// router.get("/search", (req, res) => {
-//   const { term, option, page, limit } = req.query; // Thêm page và limit vào query string
-
-//   const itemsPerPage = parseInt(limit) || 10; // Số dữ liệu trên mỗi trang, mặc định là 10
-//   const offset = (parseInt(page) || 1 - 1) * itemsPerPage; // Độ lệch cho mỗi trang
-
-//   let query = "";
-//   switch (option) {
-//     case "temperature":
-//     case "humidity":
-//     case "light":
-//       query = `
-//         SELECT * FROM datass
-//         WHERE ${option} = '${term}'
-//         ORDER BY createAt DESC
-//         LIMIT ${itemsPerPage} OFFSET ${offset}
-//       `;
-//       break;
-//     default:
-//       return res.status(400).json({ error: "Invalid option" });
-//   }
-//   console.log(query);
-
-//   db.query(query, (err, results) => {
-//     if (err) {
-//       console.error("Error searching data:", err);
-//       res.status(500).json({ error: "Error searching data" });
-//     } else {
-//       res.status(200).json(results);
-//     }
-//   });
-// });
-
-// module.exports = router;
-
 const express = require("express");
 const mysql = require("mysql");
 const router = express.Router();
@@ -184,7 +47,14 @@ router.get("/sort", (req, res) => {
       .json({ error: "Please provide a column to sort by" });
   }
 
-  const validColumns = ["id", "temperature", "humidity", "light", "createAt"];
+  const validColumns = [
+    "id",
+    "temperature",
+    "humidity",
+    "light",
+    "wind_speed",
+    "createAt",
+  ];
   if (!validColumns.includes(sortBy)) {
     return res.status(400).json({ error: "Invalid column to sort by" });
   }
@@ -242,44 +112,239 @@ router.get("/filter", (req, res) => {
 });
 
 // Search data
+// router.get("/search", (req, res) => {
+//   const { term, option, page, limit } = req.query;
+
+//   const itemsPerPage = parseInt(limit) || 10;
+//   const offset = (parseInt(page) || 1 - 1) * itemsPerPage;
+
+//   // Chuyển đổi biến term sang kiểu số thực
+//   const termFloat = parseFloat(term);
+
+//   // Kiểm tra xem liệu term có phải là một số hợp lệ không
+//   if (isNaN(termFloat) && option !== "date") {
+//     return res.status(400).json({ error: "Invalid term" });
+//   }
+
+//   let query = "";
+//   switch (option) {
+//     case "temperature":
+//     case "humidity":
+//     case "light":
+//       query = `
+//                 SELECT * FROM datass
+//                 WHERE ${option} = ?
+//                 ORDER BY createAt DESC
+//                 LIMIT ?, ?
+//             `;
+//       db.query(query, [termFloat, offset, itemsPerPage], (err, results) => {
+//         if (err) {
+//           handleQueryError(res, err, "Error searching data");
+//         } else {
+//           res.status(200).json(results);
+//         }
+//       });
+//       break;
+//     case "date":
+//       // Kiểm tra xem term có đúng định dạng thời gian không
+//       if (!/^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/.test(term)) {
+//         return res
+//           .status(400)
+//           .json({ error: "Invalid time format. Please use HH:mm:ss" });
+//       }
+//       query = `
+//             SELECT * FROM datass
+//             WHERE TIME(createAt) = ?
+//             ORDER BY createAt DESC
+//             LIMIT ?, ?
+//         `;
+//       db.query(query, [term, offset, itemsPerPage], (err, results) => {
+//         if (err) {
+//           handleQueryError(res, err, "Error searching data");
+//         } else {
+//           res.status(200).json(results);
+//         }
+//       });
+//       break;
+//     case "date":
+//       // Kiểm tra xem term có đúng định dạng thời gian không
+//       if (!/^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/.test(term)) {
+//         return res
+//           .status(400)
+//           .json({ error: "Invalid time format. Please use HH:mm:ss" });
+//       }
+//       query = `
+//                 SELECT * FROM datass
+//                 WHERE TIME(createAt) = ?
+//                 ORDER BY createAt DESC
+//                 LIMIT ?, ?
+//             `;
+//       db.query(query, [term, offset, itemsPerPage], (err, results) => {
+//         if (err) {
+//           return res.status(500).json({ error: "Error searching data" });
+//         } else {
+//           res.status(200).json(results);
+//         }
+//       });
+//       break;
+
+//     default:
+//       return res.status(400).json({ error: "Invalid option" });
+//   }
+// });
+
+// router.get("/search", (req, res) => {
+//   const { term, option, page, limit } = req.query;
+
+//   const itemsPerPage = parseInt(limit) || 10;
+//   const offset = (parseInt(page) - 1 || 0) * itemsPerPage;
+
+//   const termFloat = parseFloat(term);
+
+//   if (option !== "all" && isNaN(termFloat) && option !== "date") {
+//     return res.status(400).json({ error: "Invalid term" });
+//   }
+
+//   let query = "";
+//   let queryParams = [];
+
+//   switch (option) {
+//     case "temperature":
+//     case "humidity":
+//     case "light":
+//       query = `
+//         SELECT * FROM datass
+//         WHERE ${option} = ?
+//         ORDER BY createAt DESC
+//         LIMIT ?, ?
+//       `;
+//       queryParams = [termFloat, offset, itemsPerPage];
+//       break;
+
+//     case "date":
+//       // Kiểm tra định dạng thời gian của term
+//       if (!/^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/.test(term)) {
+//         return res
+//           .status(400)
+//           .json({ error: "Invalid time format. Please use HH:mm:ss" });
+//       }
+//       query = `
+//         SELECT * FROM datass
+//         WHERE TIME(createAt) = ?
+//         ORDER BY createAt DESC
+//         LIMIT ?, ?
+//       `;
+//       queryParams = [term, offset, itemsPerPage];
+//       break;
+
+//     case "all":
+//       query = `
+//         SELECT * FROM datass
+//         WHERE temperature = ? OR humidity = ? OR light = ?
+//         ORDER BY createAt DESC
+//         LIMIT ?, ?
+//       `;
+//       // Lặp qua giá trị của term để thêm vào mảng queryParams
+//       queryParams = [termFloat, termFloat, termFloat, offset, itemsPerPage];
+//       break;
+
+//     default:
+//       return res.status(400).json({ error: "Invalid option" });
+//   }
+
+//   db.query(query, queryParams, (err, results) => {
+//     if (err) {
+//       handleQueryError(res, err, "Error searching data");
+//     } else {
+//       res.status(200).json(results);
+//     }
+//   });
+// });
+
 router.get("/search", (req, res) => {
   const { term, option, page, limit } = req.query;
 
   const itemsPerPage = parseInt(limit) || 10;
-  const offset = (parseInt(page) || 1 - 1) * itemsPerPage;
+  const offset = (parseInt(page) - 1 || 0) * itemsPerPage;
 
-  // Chuyển đổi biến term sang kiểu số thực
   const termFloat = parseFloat(term);
 
-  console.log(typeof termFloat, termFloat);
-
-  // Kiểm tra xem liệu term có phải là một số hợp lệ không
-  if (isNaN(termFloat)) {
+  if (option !== "all" && isNaN(termFloat) && option !== "date") {
     return res.status(400).json({ error: "Invalid term" });
   }
 
   let query = "";
+  let queryParams = [];
+
   switch (option) {
     case "temperature":
     case "humidity":
     case "light":
+    case "wind":
+      const column = option === "wind" ? "wind_speed" : option;
       query = `
-                SELECT * FROM datass
-                WHERE ${option} = ?
-                ORDER BY createAt DESC
-                LIMIT ?, ?
-            `;
-      db.query(query, [termFloat, offset, itemsPerPage], (err, results) => {
-        if (err) {
-          handleQueryError(res, err, "Error searching data");
-        } else {
-          res.status(200).json(results);
-        }
-      });
+        SELECT * FROM datass
+        WHERE ${column} = ?
+        ORDER BY createAt DESC
+        LIMIT ?, ?
+      `;
+      queryParams = [termFloat, offset, itemsPerPage];
       break;
+
+    case "date":
+      if (!/^\d{2}:\d{2}:\d{2} \d{1,2}\/\d{1,2}\/\d{4}$/.test(term)) {
+        return res.status(400).json({
+          error: "Invalid datetime format. Please use HH:mm:ss dd/MM/yyyy",
+        });
+      }
+
+      // Chuyển đổi term thành định dạng mà MySQL có thể hiểu được
+      const [time, date] = term.split(" ");
+      const [day, month, year] = date.split("/");
+      const formattedDate = `${year}-${month.padStart(2, "0")}-${day.padStart(
+        2,
+        "0"
+      )} ${time}`;
+
+      query = `
+    SELECT * FROM datass
+    WHERE createAt = ?
+    ORDER BY createAt DESC
+    LIMIT ?, ?
+  `;
+      queryParams = [formattedDate, offset, itemsPerPage];
+      break;
+
+    case "all":
+      query = `
+        SELECT * FROM datass
+        WHERE temperature = ? OR humidity = ? OR light = ? OR wind_speed = ?
+        ORDER BY createAt DESC
+        LIMIT ?, ?
+      `;
+      queryParams = [
+        termFloat,
+        termFloat,
+        termFloat,
+        termFloat,
+        offset,
+        itemsPerPage,
+      ];
+      break;
+
     default:
       return res.status(400).json({ error: "Invalid option" });
   }
+
+  db.query(query, queryParams, (err, results) => {
+    if (err) {
+      handleQueryError(res, err, "Error searching data");
+    } else {
+      res.status(200).json(results);
+    }
+  });
 });
+
+// more ...
 
 module.exports = router;

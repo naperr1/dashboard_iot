@@ -11,7 +11,7 @@ const db = mysql.createConnection({
 
 router.get("/", (req, res) => {
   const query =
-    "SELECT id, temperature, humidity, light FROM datass ORDER BY id DESC LIMIT 10";
+    "SELECT id, temperature, humidity, light, wind_speed FROM datass ORDER BY id DESC LIMIT 10";
   db.query(query, (err, results) => {
     if (err) {
       console.error("Error querying data from MySQL:", err);

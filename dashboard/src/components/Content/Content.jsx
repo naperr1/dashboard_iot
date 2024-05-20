@@ -9,10 +9,12 @@ import icon2 from "../image/cloudy.png";
 import icon3 from "../image/sun.png";
 import weather from "../image/weather.png";
 import humidityIcon from "../image/humidity.png";
+import { FaWind } from "react-icons/fa6";
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Device from "../device/Device";
+import ChartWind from "../chart/ChartWind";
 
 const Content = () => {
   const [isToggled, setToggled] = useState(false);
@@ -20,14 +22,16 @@ const Content = () => {
   const [currentTemperature, setCurrentTemperature] = useState(30);
   const [humidity, setHumidity] = useState(30);
   const [lightIntensity, setLightIntensity] = useState(1024);
+  const [wind, setWind] = useState(10);
 
-  const handleToggle = () => {
-    setToggled(!isToggled);
-  };
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     const newWind = Math.floor(Math.random() * 21); // Random number from 0 to 20
+  //     setWind(newWind);
+  //   }, 5000); // 5 seconds
 
-  const handleLightToggle = () => {
-    setLightToggled(!isLightToggled);
-  };
+  //   return () => clearInterval(interval); // Cleanup function to clear interval when component unmounts
+  // }, []);
 
   const updateTemperature = (temperature) => {
     setCurrentTemperature(temperature);
@@ -39,6 +43,9 @@ const Content = () => {
 
   const updateLightIntensity = (intensity) => {
     setLightIntensity(intensity);
+  };
+  const updateWindSpeed = (speed) => {
+    setWind(speed);
   };
 
   useEffect(() => {
@@ -52,6 +59,7 @@ const Content = () => {
           setCurrentTemperature(latestData.temperature);
           setHumidity(latestData.humidity);
           setLightIntensity(latestData.light);
+          setWind(latestData.wind_speed);
 
           if (latestData.temperature > 40) {
             toast.error("Nhiệt độ vượt quá 40°C!");
@@ -83,7 +91,7 @@ const Content = () => {
     const temperatureGradientColor = getGradientColor(
       currentTemperature,
       0,
-      40,
+      50,
       [0, 153, 247],
       [241, 23, 18]
     );
@@ -103,13 +111,19 @@ const Content = () => {
       [209, 145, 60],
       [255, 209, 148]
     );
-
-    console.log("Mã màu temperatureBox đã thay đổi:", temperatureGradientColor);
-    console.log("Mã màu humidityBox đã thay đổi:", humidityGradientColor);
-    console.log(
-      "Mã màu lightIntensityBox đã thay đổi:",
-      lightIntensityGradientColor
+    const windIntensityGradientColor = getGradientColor(
+      lightIntensity,
+      0,
+      30,
+      [136, 205, 246],
+      [188, 230, 255]
     );
+    // console.log("Mã màu temperatureBox đã thay đổi:", temperatureGradientColor);
+    // console.log("Mã màu humidityBox đã thay đổi:", humidityGradientColor);
+    // console.log(
+    //   "Mã màu lightIntensityBox đã thay đổi:",
+    //   windIntensityGradientColor
+    // );
 
     document.getElementById("temperatureBox").style.background =
       temperatureGradientColor;
@@ -119,7 +133,9 @@ const Content = () => {
 
     document.getElementById("lightIntensityBox").style.background =
       lightIntensityGradientColor;
-  }, [currentTemperature, humidity, lightIntensity]);
+    document.getElementById("windIntensityBox").style.background =
+      windIntensityGradientColor;
+  }, [currentTemperature, humidity, lightIntensity, wind]);
 
   return (
     <div className="container" style={{ height: "calc(100vh - 75px)" }}>
@@ -156,6 +172,13 @@ const Content = () => {
             <span style={{ color: "#fff" }}>{lightIntensity}Lux</span>
           </div>
         </div>
+        <div className="box light-box" id="windIntensityBox">
+          <FaWind className="icon icon-light" />
+          <div className="light-box2">
+            <FaWind className="icon" />
+            <span style={{ color: "#fff" }}>{wind}m/s</span>
+          </div>
+        </div>
       </div>
 
       <ToastContainer />
@@ -167,6 +190,7 @@ const Content = () => {
             updateHumidity={updateHumidity}
             updateLightIntensity={updateLightIntensity}
           />
+          <ChartWind updateWindSpeed={updateWindSpeed} />
         </div>
 
         <Device />

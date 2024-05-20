@@ -21,7 +21,7 @@ ChartJS.register(
   Legend
 );
 
-const LineChart = () => {
+const ChartWind = () => {
   const [data, setData] = useState({ labels: [], datasets: [] });
   const maxDataLength = 10; // Giới hạn số lượng điểm trên biểu đồ
 
@@ -32,29 +32,15 @@ const LineChart = () => {
         const apiData = await response.json();
 
         const labels = apiData.map((item) => item.id.toString());
-        const temperatureData = apiData.map((item) => item.temperature);
-        const humidityData = apiData.map((item) => item.humidity);
-        const lightData = apiData.map((item) => item.light);
+        const wind_speed = apiData.map((item) => item.wind_speed);
 
         setData({
           labels: labels.slice(-maxDataLength),
           datasets: [
             {
-              label: "Temperature",
-              data: temperatureData.slice(-maxDataLength),
+              label: "Wind",
+              data: wind_speed.slice(-maxDataLength),
               borderColor: "red",
-              fill: false,
-            },
-            {
-              label: "Humidity",
-              data: humidityData.slice(-maxDataLength),
-              borderColor: "blue",
-              fill: false,
-            },
-            {
-              label: "Light",
-              data: lightData.slice(-maxDataLength),
-              borderColor: "yellow",
               fill: false,
             },
           ],
@@ -79,7 +65,7 @@ const LineChart = () => {
       },
       title: {
         display: true,
-        text: "Chart sensor",
+        text: "Chart wind_speed",
       },
     },
   };
@@ -91,4 +77,4 @@ const LineChart = () => {
   );
 };
 
-export default LineChart;
+export default ChartWind;

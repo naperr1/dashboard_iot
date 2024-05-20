@@ -28,10 +28,11 @@ h1 {
 }
 
 .container_box .box {
-  width: 30%;
+  width: 25%;
   height: 140px;
   background-color: #1f2a40;
   border-radius: 5px;
+  margin: 0 10px;
   /* display: flex;
   align-items: center;
   justify-content: space-around;

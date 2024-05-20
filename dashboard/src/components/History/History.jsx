@@ -150,8 +150,10 @@ const History = () => {
   const { RangePicker } = DatePicker;
 
   const dataSearch = [
+    { name: "all", value: "All" },
     { name: "device", value: "Device" },
     { name: "status", value: "Status" },
+    { name: "date", value: "Date" },
   ];
 
   // useEffect(() => {

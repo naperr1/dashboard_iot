@@ -7,7 +7,7 @@ const moment = require("moment");
 
 // MQTT
 const mqtt = require("mqtt");
-const mqttBroker = "mqtt://10.21.32.225:2000";
+const mqttBroker = "mqtt://192.168.226.107:2000";
 const mqttOptions = {
   username: "admin",
   password: "123456",
@@ -42,12 +42,11 @@ router.get("/", (req, res) => {
 });
 
 router.get("/sort", (req, res) => {
-  const { sortBy } = req.query; // Lấy tham số sortBy từ query string của yêu cầu
-  const page = parseInt(req.query.page) || 1; // Trang được yêu cầu, mặc định là trang 1
-  const perPage = 10; // Số lượng bản ghi mỗi trang
-  const offset = (page - 1) * perPage; // Vị trí bắt đầu của bản ghi trong truy vấn
+  const { sortBy } = req.query;
+  const page = parseInt(req.query.page) || 1;
+  const perPage = 10;
+  const offset = (page - 1) * perPage;
 
-  // Xây dựng truy vấn SQL để sắp xếp dữ liệu và giữ nguyên phân trang
   const query = `
     SELECT * FROM actionhistory 
     ORDER BY ${sortBy} 
@@ -64,26 +63,82 @@ router.get("/sort", (req, res) => {
   });
 });
 
+// router.get("/search", (req, res) => {
+//   const { searchTerm, selectedOption } = req.query; // Lấy thông tin từ query string của yêu cầu
+//   const page = parseInt(req.query.page) || 1; // Trang được yêu cầu, mặc định là trang 1
+//   const perPage = 10; // Số lượng bản ghi mỗi trang
+//   const offset = (page - 1) * perPage; // Vị trí bắt đầu của bản ghi trong truy vấn
+
+//   // Xây dựng truy vấn SQL để tìm kiếm dữ liệu và giữ nguyên phân trang
+//   const query = `
+//     SELECT * FROM actionhistory
+//     WHERE ${selectedOption} LIKE '%${searchTerm}%'
+//     LIMIT ${perPage} OFFSET ${offset}
+//   `;
+
+//   db.query(query, (error, results, fields) => {
+//     if (error) {
+//       console.error("Lỗi truy vấn:", error);
+//       res.status(500).send("Lỗi server");
+//       return;
+//     }
+//     res.json(results); // Trả về kết quả dưới dạng JSON
+//   });
+// });
+
 router.get("/search", (req, res) => {
-  const { searchTerm, selectedOption } = req.query; // Lấy thông tin từ query string của yêu cầu
-  const page = parseInt(req.query.page) || 1; // Trang được yêu cầu, mặc định là trang 1
-  const perPage = 10; // Số lượng bản ghi mỗi trang
-  const offset = (page - 1) * perPage; // Vị trí bắt đầu của bản ghi trong truy vấn
+  const { searchTerm, selectedOption } = req.query;
+  const page = parseInt(req.query.page) || 1;
+  const perPage = 10;
+  const offset = (page - 1) * perPage;
 
-  // Xây dựng truy vấn SQL để tìm kiếm dữ liệu và giữ nguyên phân trang
-  const query = `
-    SELECT * FROM actionhistory 
-    WHERE ${selectedOption} LIKE '%${searchTerm}%' 
-    LIMIT ${perPage} OFFSET ${offset}
-  `;
+  if (!searchTerm || !selectedOption) {
+    return res
+      .status(400)
+      .send("searchTerm and selectedOption query parameters are required");
+  }
 
-  db.query(query, (error, results, fields) => {
+  // Kiểm tra selectedOption có hợp lệ không để tránh SQL Injection
+  const allowedOptions = ["date", "device", "status", "ledId", "all"];
+  if (!allowedOptions.includes(selectedOption)) {
+    return res.status(400).send("Invalid selectedOption");
+  }
+
+  // Xây dựng truy vấn SQL
+  let query;
+  let queryParams = [];
+
+  if (selectedOption === "all") {
+    query = `
+            SELECT * FROM actionhistory
+            WHERE date LIKE ? OR device LIKE ? OR status LIKE ? OR ledId LIKE ?
+            LIMIT ? OFFSET ?
+        `;
+    const searchPattern = `%${searchTerm}%`;
+    queryParams = [
+      searchPattern,
+      searchPattern,
+      searchPattern,
+      searchPattern,
+      perPage,
+      offset,
+    ];
+  } else {
+    query = `
+            SELECT * FROM actionhistory
+            WHERE ?? LIKE ?
+            LIMIT ? OFFSET ?
+        `;
+    queryParams = [selectedOption, `%${searchTerm}%`, perPage, offset];
+  }
+
+  db.query(query, queryParams, (error, results) => {
     if (error) {
       console.error("Lỗi truy vấn:", error);
       res.status(500).send("Lỗi server");
       return;
     }
-    res.json(results); // Trả về kết quả dưới dạng JSON
+    res.json(results);
   });
 });
 
@@ -151,7 +206,7 @@ router.post("/toggle-device", (req, res) => {
 
   const id = uuidv4();
 
-  const currentDate = new Date().toISOString().slice(0, 19).replace("T", " "); // Lấy ngày và giờ hiện tại
+  const currentDate = new Date().toISOString().slice(0, 19).replace("T", " ");
   const insertQuery = `INSERT INTO actionhistory (id, device, status, date, ledId) VALUES (?, ?, ?, ?, ?)`;
   db.query(
     insertQuery,
@@ -199,8 +254,8 @@ router.get("/filter", (req, res) => {
   const offset = (page - 1) * limit;
 
   const sql = `
-    SELECT * FROM actionhistory 
-    WHERE date BETWEEN ? AND ? 
+    SELECT * FROM actionhistory
+    WHERE date BETWEEN ? AND ?
     LIMIT ? OFFSET ?
   `;
   const values = [startDate, endDate, limit, offset];
@@ -212,6 +267,38 @@ router.get("/filter", (req, res) => {
       res.json(results);
     }
   });
+});
+
+router.get("/api/device_status", async (req, res) => {
+  try {
+    const query = `
+      SELECT a.device, a.status, a.date
+      FROM actionhistory a
+      INNER JOIN (
+        SELECT device, MAX(date) AS max_date
+        FROM actionhistory
+        GROUP BY device
+      ) b ON a.device = b.device AND a.date = b.max_date
+    `;
+
+    db.query(query, (err, rows) => {
+      if (err) {
+        console.error("Error executing query:", err);
+        res.status(500).send("Server error");
+        return;
+      }
+
+      const results = {};
+      for (let row of rows) {
+        results[row.device] = row.status;
+      }
+
+      res.json(results);
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server error");
+  }
 });
 
 module.exports = router;

@@ -2,7 +2,7 @@ const mqtt = require("mqtt");
 const mysql = require("mysql");
 
 // MQTT Broker settings
-const mqttBroker = "mqtt://10.21.32.225:2000";
+const mqttBroker = "mqtt://192.168.226.107:2000";
 const mqttOptions = {
   username: "admin",
   password: "123456",
@@ -39,12 +39,12 @@ client.on("message", (topic, message) => {
   if (topic === mqttTopic) {
     // Xử lý dữ liệu từ topic "data"
     const data = JSON.parse(message);
-    const { temperature, humidity, light_intensity } = data;
+    const { temperature, humidity, light_intensity, wind_speed } = data;
 
     const query =
-      "INSERT INTO datass (id, temperature, humidity, light, createAt) VALUES (NULL, ?, ?, ?, NOW())";
+      "INSERT INTO datass (id, temperature, humidity, light, wind_speed, createAt) VALUES (NULL, ?, ?, ?, ?, NOW())";
 
-    const values = [temperature, humidity, light_intensity];
+    const values = [temperature, humidity, light_intensity, wind_speed];
 
     connection.query(query, values, (error, results, fields) => {
       if (error) {
